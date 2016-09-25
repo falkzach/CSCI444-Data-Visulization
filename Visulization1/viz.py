@@ -32,7 +32,7 @@ for drug, sideEffects in drugs.items():
         else:
             allSideEffects[sideAffect] += 1
 
-lessSideEffects = {key: value for key, value in allSideEffects.items() if value >= 7} # bug if < 4
+lessSideEffects = {key: value for key, value in allSideEffects.items() if value >= 7} # 7 is good
 effectLabels = []
 drugLabels = []
 
@@ -46,7 +46,8 @@ for drug, effects in drugs.items():
         if effect in effects:
             row.append(count)
         else:
-            row.append(0)
+            # row.append(0)
+            row.append(-1 * count)
     drugsPlotData.append(row)
 
 drugsPlotData.reverse()
