@@ -42,6 +42,7 @@ for drug, effects in drugs.items():
     row = []
     drugLabels.append(drug)
     for effect, count in sorted(lessSideEffects.items(), key=lambda x: x[1]):
+    # for effect, count in lessSideEffects.items(): # don't sort
         effectLabels.append(effect)
         if effect in effects:
             row.append(count)
@@ -58,19 +59,26 @@ data = np.asarray(drugsPlotData)
 fig, ax = plt.subplots(1)
 
 # increase figure resolution
-fig.set_size_inches(21, 25)
+fig.set_size_inches(20, 32)
+
 
 # labels
-ax.set_title('Top 50 Prescribed Drugs and Their Major Side Effects', fontsize=30)
+ax.set_title('Top 50 Perscribed Drugs by Net Sales and Their Common Side Effects', fontsize=30, y=1.08)
+ax.set_ylabel('Perscribed drugs by net sales (highest netting at top)')
+ax.set_xlabel('Common, serious side effects (only side effects shared between 7 or more drugs shown)')
 
-ax.tick_params(axis='both', direction='out')
 
 ax.xaxis.set_ticks(np.arange(0.5, len(effectLabels) + 1, 1.0))
-ax.set_xticklabels(effectLabels, rotation='vertical')
+ax.set_xticklabels(effectLabels, rotation='45', ha='right')
 
 ax.yaxis.set_ticks(np.arange(0.5, len(drugLabels) + 1, 1.0))
 ax.set_yticklabels(drugLabels)
 
+# colorscale
+red_blue = plt.get_cmap('RdBu_r')
+
 # generate and save
-ppl.pcolormesh(fig, ax, data)
+p = ax.pcolormesh(data, cmap=red_blue)
+cb = fig.colorbar(p, label='Prevelance of side affect amongst listed drugs (red present in drug, blue not present in drug)')
+
 fig.savefig('drugEffects.png')
