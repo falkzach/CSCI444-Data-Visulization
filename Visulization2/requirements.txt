@@ -1,0 +1,2 @@
+prettyplotlib
+numpy
