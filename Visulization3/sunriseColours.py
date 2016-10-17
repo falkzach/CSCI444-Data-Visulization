@@ -16,6 +16,7 @@ w_c = []
 w_n = []
 s_c = []
 s_n = []
+m_c = []
 
 
 
@@ -68,6 +69,8 @@ with open(DATA, encoding='utf8') as csvfile:
             s_c.append(rgb2hex((line[7], line[8], line[9])))
             s_n.append(line[10])
 
+            m_c.append(rgb2hex((128, 128, 128))) # middle grey
+
 # locations = set(l)
 # print(locations)
 # for location in locations:
@@ -87,14 +90,14 @@ jscode="""
         source.trigger('change');
     """
 
-xrange = (min(x) - 10, max(x) + 10)
-yrange = (min(y) - 10, max(y) + 10)
-print(xrange, yrange)
+x_range = (min(x) - 10, max(x) + 10)
+y_range = (min(y) - 10, max(y) + 10)
 
-print(min(x))
+x_label = 'Time'
+y_label = 'Luminosity (Lux)'
 
 
-p1 = figure(title='Sky Colours', x_range=xrange, y_range=yrange,
+p1 = figure(title='Sky Colours', x_range=x_range, y_range=y_range,
             tools='box_zoom,wheel_zoom,pan,reset', plot_width=400, plot_height=800)
 p1.scatter(x, y, radius=radii, fill_color=s_c, fill_alpha=0.6, line_color=None)
 
@@ -102,14 +105,17 @@ p1.x_range.callback = CustomJS(
         args=dict(source=source, range=p1.x_range), code=jscode % ('x', 'width'))
 p1.y_range.callback = CustomJS(
         args=dict(source=source, range=p1.y_range), code=jscode % ('y', 'height'))
+p1.xaxis.axis_label = x_label
+p1.yaxis.axis_label = y_label
 
-
-p2 = figure(title='Overview', x_range=xrange, y_range=yrange,
+p2 = figure(title='Chicago Sunrise Colours', x_range=x_range, y_range=y_range,
             tools='', plot_width=400, plot_height=800)
-p2.scatter(x, y, radius=radii, fill_color=s_c, fill_alpha=0.6, line_color=None)
+p2.scatter(x, y, radius=radii, fill_color=m_c, fill_alpha=0.6, line_color=None)
 rect = Rect(x='x', y='y', width='width', height='height', fill_alpha=0.1,
             line_color='black', fill_color='black')
 p2.add_glyph(source, rect)
+p2.xaxis.axis_label = x_label
+p2.yaxis.axis_label = y_label
 
 
 p3 = figure(title='Water Colours', x_range=p1.x_range, y_range=p1.y_range,
@@ -120,7 +126,8 @@ p3.x_range.callback = CustomJS(
         args=dict(source=source, range=p1.x_range), code=jscode % ('x', 'width'))
 p3.y_range.callback = CustomJS(
         args=dict(source=source, range=p1.y_range), code=jscode % ('y', 'height'))
-
+p3.xaxis.axis_label = x_label
+p3.yaxis.axis_label = y_label
 
 layout = hplot(gridplot([[p1, p2, p3]]))
 show(layout)
