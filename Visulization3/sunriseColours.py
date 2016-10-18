@@ -57,7 +57,7 @@ def rgb2hex(rgb):
 
 
 def time_as_time(time):
-    d = datetime.datetime.strptime('2016/10/03 ' + time, '%Y/%m/%d %I:%M:%S')
+    d = datetime.datetime.strptime('2016/10/03 0' + time, '%Y/%m/%d %H:%M:%S')
     return d
 
 
@@ -103,7 +103,7 @@ jscode="""
 
 x_label = 'Time'
 y_label = 'Luminosity (Lux)'
-size = 10
+size = 20
 
 
 p1 = figure(title='Sky Colours', x_axis_type='datetime',
@@ -118,7 +118,7 @@ p1.xaxis.axis_label = x_label
 p1.yaxis.axis_label = y_label
 
 
-p2 = figure(title='Chicago Sunrise Colours along the Red Line', x_axis_type='datetime',
+p2 = figure(title='Chicago Sunrise Colours along the Red Line 2016/10/03', x_axis_type='datetime',
             tools='', plot_width=500, plot_height=800, background_fill_color='black',)
 for location in locations:
     p2.scatter(x_l[location], y_l[location], size=size,
