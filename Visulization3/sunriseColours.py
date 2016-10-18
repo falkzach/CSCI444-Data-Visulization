@@ -3,7 +3,7 @@
 import csv
 import datetime
 
-from bokeh.plotting import output_file, figure, show, hplot
+from bokeh.plotting import output_file, figure, show
 from bokeh.models import ColumnDataSource, CustomJS, Rect
 from bokeh.layouts import gridplot
 
@@ -17,9 +17,16 @@ w_c = []
 w_n = []
 s_c = []
 s_n = []
-m_c = []
 
-
+x_l = {}
+y_l = {}
+c_l = {
+    'Argyle ':  '#FF0000',
+    'Berwyn':   '#FFFF00',
+    'Wilson':   '#008000',
+    'Thorndale':    '#800080',
+    'Bryn Mawr':    '#0000FF'
+}
 
 # read data
 # 0 time
@@ -38,9 +45,8 @@ m_c = []
 
 def clamp(x):
     if x == 'NA':
-        return 255
-    x = int(x)
-    return max(0, min(x, 255))
+        return 0
+    return max(0, min(int(x), 255))
 
 
 def rgb2hex(rgb):
@@ -51,9 +57,18 @@ def rgb2hex(rgb):
 
 
 def time_as_time(time):
-    return datetime.datetime.strptime('2016/10/03 ' + time, '%Y/%m/%d %I:%M:%S')
+    d = datetime.datetime.strptime('2016/10/03 ' + time, '%Y/%m/%d %I:%M:%S')
+    return d
 
-print(datetime.time())
+
+def indexes_at(data, key):
+    return [i for i, x in enumerate(data) if x == key]
+
+
+def sublist(data, indexes):
+    return [data[index] for index in indexes]
+
+
 # read in file
 with open(DATA, encoding='utf8') as csvfile:
     reader = csv.reader(csvfile)
@@ -68,15 +83,12 @@ with open(DATA, encoding='utf8') as csvfile:
             s_c.append(rgb2hex((line[7], line[8], line[9])))
             s_n.append(line[10])
 
-            m_c.append(rgb2hex((128, 128, 128))) # middle grey
 
-# locations = set(l)
-# print(locations)
-# for location in locations:
-#     index = [i for i, x in enumerate(l) if x == location]
-#     print(l.index(location))
-
-radii = [10 for x in range(len(w_c))]
+locations = set(l)
+for location in locations:
+    index = indexes_at(l, location)
+    x_l[location] = sublist(x, index)
+    y_l[location] = sublist(y, index)
 
 source = ColumnDataSource({'x': [], 'y': [], 'width': [], 'height': []})
 
@@ -91,11 +103,12 @@ jscode="""
 
 x_label = 'Time'
 y_label = 'Luminosity (Lux)'
+size = 10
 
 
 p1 = figure(title='Sky Colours', x_axis_type='datetime',
-            tools='box_zoom,wheel_zoom,pan,reset', plot_width=400, plot_height=800)
-p1.scatter(x, y, fill_color=s_c, fill_alpha=0.6, line_color=None)
+            tools='box_zoom,wheel_zoom,pan,reset,hover', plot_width=500, plot_height=800, background_fill_color='black')
+p1.scatter(x, y, size=size, fill_color=s_c, fill_alpha=0.6, line_color=None)
 
 p1.x_range.callback = CustomJS(
         args=dict(source=source, range=p1.x_range), code=jscode % ('x', 'width'))
@@ -105,19 +118,23 @@ p1.xaxis.axis_label = x_label
 p1.yaxis.axis_label = y_label
 
 
-p2 = figure(title='Chicago Sunrise Colours', x_axis_type='datetime',
-            tools='', plot_width=400, plot_height=800)
-p2.scatter(x, y, fill_color=m_c, fill_alpha=0.6, line_color=None)
+p2 = figure(title='Chicago Sunrise Colours along the Red Line', x_axis_type='datetime',
+            tools='', plot_width=500, plot_height=800, background_fill_color='black',)
+for location in locations:
+    p2.scatter(x_l[location], y_l[location], size=size,
+               fill_color=c_l[location], fill_alpha=0.6,
+               line_color=None, legend=location)
 rect = Rect(x='x', y='y', width='width', height='height', fill_alpha=0.1,
-            line_color='black', fill_color='black')
+            line_color='orange', fill_color='white')
 p2.add_glyph(source, rect)
 p2.xaxis.axis_label = x_label
 p2.yaxis.axis_label = y_label
+p2.legend.location = 'top_left'
 
 
 p3 = figure(title='Water Colours', x_range=p1.x_range, y_range=p1.y_range, x_axis_type='datetime',
-            tools='box_zoom,wheel_zoom,pan,reset', plot_width=400, plot_height=800)
-p3.scatter(x, y, fill_color=w_c, fill_alpha=0.6, line_color=None)
+            tools='box_zoom,wheel_zoom,pan,reset,hover', plot_width=500, plot_height=800, background_fill_color='black')
+p3.scatter(x, y, size=size, fill_color=w_c, fill_alpha=0.6, line_color=None)
 
 p3.x_range.callback = CustomJS(
         args=dict(source=source, range=p1.x_range), code=jscode % ('x', 'width'))
@@ -127,6 +144,6 @@ p3.xaxis.axis_label = x_label
 p3.yaxis.axis_label = y_label
 
 
-layout = hplot(gridplot([[p1, p2, p3]]))
+layout = gridplot([[p1, p2, p3]])
 show(layout)
 
