@@ -104,10 +104,12 @@ jscode="""
 x_label = 'Time'
 y_label = 'Luminosity (Lux)'
 size = 20
+width = 1500
+height = 300
 
 
 p1 = figure(title='Sky Colours', x_axis_type='datetime',
-            tools='box_zoom,wheel_zoom,pan,reset,hover', plot_width=500, plot_height=800, background_fill_color='black')
+            tools='box_zoom,wheel_zoom,pan,reset,hover', plot_width=width, plot_height=height, background_fill_color='black')
 p1.scatter(x, y, size=size, fill_color=s_c, fill_alpha=0.6, line_color=None)
 
 p1.x_range.callback = CustomJS(
@@ -119,7 +121,7 @@ p1.yaxis.axis_label = y_label
 
 
 p2 = figure(title='Chicago Sunrise Colours along the Red Line 2016/10/03', x_axis_type='datetime',
-            tools='', plot_width=500, plot_height=800, background_fill_color='black',)
+            tools='', plot_width=width, plot_height=height, background_fill_color='black',)
 for location in locations:
     p2.scatter(x_l[location], y_l[location], size=size,
                fill_color=c_l[location], fill_alpha=0.6,
@@ -133,7 +135,7 @@ p2.legend.location = 'top_left'
 
 
 p3 = figure(title='Water Colours', x_range=p1.x_range, y_range=p1.y_range, x_axis_type='datetime',
-            tools='box_zoom,wheel_zoom,pan,reset,hover', plot_width=500, plot_height=800, background_fill_color='black')
+            tools='box_zoom,wheel_zoom,pan,reset,hover', plot_width=width, plot_height=height, background_fill_color='black')
 p3.scatter(x, y, size=size, fill_color=w_c, fill_alpha=0.6, line_color=None)
 
 p3.x_range.callback = CustomJS(
@@ -144,6 +146,6 @@ p3.xaxis.axis_label = x_label
 p3.yaxis.axis_label = y_label
 
 
-layout = gridplot([[p1, p2, p3]])
+layout = gridplot([[p1], [p3], [p2]])
 show(layout)
 
