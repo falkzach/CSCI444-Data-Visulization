@@ -1,0 +1,150 @@
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.3/css/bootstrap.min.css" integrity="sha384-MIwDKRSSImVFAZCVLtU0LMDdON6KVCrZHyVQQj6e8wIEJkW4tvwqXrbMIya1vriY" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js" integrity="sha384-THPy051/pYDQGanwU6poAc/hOdQxjnOEXzbT+OuUAFqNqFjL+4IGLBgCJC3ZOShY" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js" integrity="sha384-Plbmg8JY28KFelvJVai01l8WyZzrYWG825m+cZ0eDDS1f7d/js6ikvy1+X+guPIB" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.3/js/bootstrap.min.js" integrity="sha384-ux8v3A6CPtOTqOzMKiuo3d/DomGaaClxFYdCu2HPMBEkf6x2xiDyJ7gkXU0MWwaD" crossorigin="anonymous"></script>
+    
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <h1>Bicycle Gearing</h1>
+        <!-- Plotly chart will be drawn inside this DIV -->
+        <div class="m-t-1 col-lg-4">
+            <h2>Current</h2>
+            <div id="current" style="width:100%;height:100%"></div>
+            <div>
+                <form>
+
+                </form>
+            </div>
+        </div>
+        <!--need to figure out subplots,having multiple divs doesnt really work-->
+        <div class="m-t-1 col-lg-4">
+            <h2>Potential</h2>
+            <div id="considering" style="width:100%;height:100%"></div>
+        </div>
+    </div>
+</div>
+<script>
+    var gearcalc = {
+        buildLine: function(x, y, z, color) {
+            return {
+                x: x,
+                y: y,
+                z: z,
+                mode: 'lines+markers',
+                marker: {
+                    color: color,
+                    size: 12,
+                    symbol: 'circle',
+                    line: {
+                        color: 'rgb(0,0,0)',
+                        width: 10
+                    }
+                },
+                line: {
+                    color: color,
+                    width: 2.5
+                },
+                type: 'scatter3d'
+            }
+        },
+        buildData: function(front, rear, color) {
+            var data = [];
+            for(var i = 0; i < front.length; i++) {
+                var x = [];
+                var y = [];
+                var z = [];
+                for (var j = 0; j < rear.length; j++) {
+                    x.push(rear[j]);
+                    y.push(front[i]);
+                    z.push(front[i] / rear[j]);
+                }
+                data.push(gearcalc.buildLine(x,y,z,color));
+            }
+            var shifts = gearcalc.buildShifts(front, rear, color);
+            return data.concat(shifts);
+        },
+        buildShifts: function(front, rear, color) {
+            var shifts = [];
+            var x = [];
+            var y = [];
+            var z = [];
+            if(front.length == 2) {
+                for(var i = Math.ceil(rear.length * 0.125); i < parseInt(rear.length * 0.875); i++) {
+                    x = [rear[i], rear[i]];
+                    y = [front[0], front[1]];
+                    z = [front[0]/rear[i], front[1]/rear[i]];
+                    shifts.push(gearcalc.buildLine(x,y,z,color));
+                }
+            } else if(front.length > 1) {
+                for(i = 0; i < parseInt(rear.length * 0.75); i++) {
+                    x = [rear[i], rear[i]];
+                    y = [front[0], front[1]];
+                    z = [front[0]/rear[i], front[1]/rear[i]];
+                    shifts.push(gearcalc.buildLine(x,y,z,color));
+                }
+            }
+            if(front.length > 2) {
+                for(i = rear.length - 1; i > rear.length * 0.25; i--) {
+                    x = [rear[i], rear[i]];
+                    y = [front[1], front[2]];
+                    z = [front[1]/rear[i], front[2]/rear[i]];
+                    shifts.push(gearcalc.buildLine(x,y,z,color));
+                }
+            }
+            return shifts;
+        }
+    };
+
+    $(function(){
+//        my current 3x7 system
+        var f = [42, 32, 24];
+        var r = [12, 14, 16, 18, 21, 26, 32];
+        var data = gearcalc.buildData(f, r, '#1f77b4');
+
+//        sram eagle 1x11 system, 3 different front cog options
+        var f2 = [32];
+        var r2 = [10, 12, 14, 16, 18, 21, 24, 28, 32, 36, 42, 50];
+        var data2 = gearcalc.buildData(f2, r2, '#F71818');
+
+        var size = 550;
+        var margin = 40;
+
+        var current_layout = {
+//            title: 'Current Bicycle Gearing',
+            showlegend: false,
+            autosize: true,
+            width: size,
+            height: size,
+            margin: {
+                l: margin,
+                r: margin,
+                b: margin,
+                t: margin
+            }
+        };
+
+        var considering_layout = {
+//            title: 'Considering Bicycle Gearing',
+            showlegend: false,
+            autosize: true,
+            width: size,
+            height: size,
+            margin: {
+                l: margin,
+                r: margin,
+                b: margin,
+                t: margin
+            }
+        };
+
+        Plotly.newPlot('current', data, current_layout);
+        Plotly.newPlot('considering', data2, considering_layout);
+    });
+</script>
+</body>
+
