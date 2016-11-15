@@ -94,7 +94,7 @@ hover.tooltips = [
     # ("2013 total", "@t2013"),
 ]
 
-code="""
+code = """
         var data = source.get('data');
         var year = cb_obj.get('value');
         var replace = data['t'+year];
@@ -106,7 +106,6 @@ code="""
     """
 
 slidercb = CustomJS(args=dict(source=source), code=code.format(var='data'))
-
 slider = Slider(start=2006, end=2013, value=2013, step=1, title="year", callback=slidercb)
 
 # checkbox = checkbox_group = CheckboxGroup(labels=["Percent Change"], active=[0])
