@@ -70,12 +70,17 @@
 
 <script>
     var gearcalc = {
-        buildLine: function(x, y, z, color, scene) {
+        // http://paletton.com/#uid=c1+4O2t5h0kAcG6kIKfqAHkG2sPHNmt
+        rearShiftColor: '#8CF100',
+        frontShiftColor: '#E7FC00',
+        crossChainColor: '#9C05C7',
+        buildLine: function(x, y, z, color, scene, shift) {
+            var mode = shift?'lines':'lines+markers';
             return {
                 x: x,
                 y: y,
                 z: z,
-                mode: 'lines+markers',
+                mode: mode,
                 marker: {
                     color: color,
                     size: 12,
@@ -93,7 +98,7 @@
                 scene: scene
             }
         },
-        buildData: function(front, rear, color, scene) {
+        buildData: function(front, rear, scene) {
             var data = [];
             for(var i = 0; i < front.length; i++) {
                 var x = [];
@@ -104,12 +109,12 @@
                     y.push(front[i]);
                     z.push(front[i] / rear[j]);
                 }
-                data.push(gearcalc.buildLine(x,y,z,color, scene));
+                data.push(gearcalc.buildLine(x,y,z,gearcalc.rearShiftColor, scene, false));
             }
-            var shifts = gearcalc.buildShifts(front, rear, color);
+            var shifts = gearcalc.buildShifts(front, rear, gearcalc.frontShiftColor, scene);
             return data.concat(shifts);
         },
-        buildShifts: function(front, rear, color) {
+        buildShifts: function(front, rear, color, scene) {
             var shifts = [];
             var x = [];
             var y = [];
@@ -119,14 +124,14 @@
                     x = [rear[i], rear[i]];
                     y = [front[0], front[1]];
                     z = [front[0]/rear[i], front[1]/rear[i]];
-                    shifts.push(gearcalc.buildLine(x,y,z,color));
+                    shifts.push(gearcalc.buildLine(x,y,z,color,scene,true));
                 }
             } else if(front.length > 1) {
                 for(i = 0; i < parseInt(rear.length * 0.75); i++) {
                     x = [rear[i], rear[i]];
                     y = [front[0], front[1]];
                     z = [front[0]/rear[i], front[1]/rear[i]];
-                    shifts.push(gearcalc.buildLine(x,y,z,color));
+                    shifts.push(gearcalc.buildLine(x,y,z,color,scene,true));
                 }
             }
             if(front.length > 2) {
@@ -134,7 +139,7 @@
                     x = [rear[i], rear[i]];
                     y = [front[1], front[2]];
                     z = [front[1]/rear[i], front[2]/rear[i]];
-                    shifts.push(gearcalc.buildLine(x,y,z,color));
+                    shifts.push(gearcalc.buildLine(x,y,z,color,scene,true));
                 }
             }
             return shifts;
@@ -244,16 +249,16 @@
                 var consideringFront = cogInput.getValues('consideringFront');
                 var consideringRear = cogInput.getValues('consideringRear');
 
-                var currentData = gearcalc.buildData(currentFront, currentRear, '#1f77b4', 'scene1');
-                var consideringData = gearcalc.buildData(consideringFront, consideringRear, '#1f77b4', 'scene2');
+                var currentData = gearcalc.buildData(currentFront, currentRear, 'scene1');
+                var consideringData = gearcalc.buildData(consideringFront, consideringRear, 'scene2');
 
                 var data = currentData.concat(consideringData);
                 Plotly.newPlot('myDiv', data, plot.layout);
             });
         },
         demo: function() {
-            var d1 = gearcalc.buildData(plot.f1, plot.r1, '#1f77b4', 'scene1');
-            var d2 = gearcalc.buildData(plot.f2, plot.r2, '#1f77b4', 'scene2');
+            var d1 = gearcalc.buildData(plot.f1, plot.r1, 'scene1');
+            var d2 = gearcalc.buildData(plot.f2, plot.r2, 'scene2');
             var d = d1.concat(d2);
             Plotly.newPlot('myDiv', d, plot.layout);
         }
