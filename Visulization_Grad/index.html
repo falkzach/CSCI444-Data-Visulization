@@ -12,7 +12,7 @@
     <h1>Bike Gearing</h1>
     <div class="row">
         <div class="col-lg-6">
-            <h2>Current</h2>
+            <h2>Current Groupset</h2>
             <form>
                 <div class="form-group">
                     <label for="currentFrontCount">Front Cog Count:</label>
@@ -32,7 +32,7 @@
 
         </div>
         <div class="col-lg-6">
-            <h2>Considering</h2>
+            <h2>Considering Groupset</h2>
             <div class="form-group">
                 <label for="consideringFrontCount">Front Cog Count:</label>
                 <input type="number" class="form-control" id="consideringFrontCount" min="1" max="3" step="1" value="1">
@@ -174,13 +174,6 @@
             cogInput.addCogs(1, 'currentRear');
             cogInput.addCogs(1, 'consideringFront');
             cogInput.addCogs(1, 'consideringRear');
-
-            $('#plotGenBtn').on('click', function(e) {
-                cogInput.getValues('currentFront');
-                cogInput.getValues('currentRear');
-                cogInput.getValues('consideringFront');
-                cogInput.getValues('consideringRear');
-            });
         },
         alterCogs: function(oldCount, newCount, cogSet) {
             if(oldCount < newCount) {
@@ -210,40 +203,23 @@
             }
         },
         getValues: function(cogSet) {
-            var values = $("input[name='" + cogSet + "[]']").map(function(){
+            return $("input[name='" + cogSet + "[]']").map(function(){
                 return parseInt($(this).val());
             }).get();
-            console.log(values);
-            return values;
         }
     };
 
-    $(function() {
-        cogInput.init();
-
-        //        my current 3x7 system
-        var f = [42, 32, 24];
-        var r = [12, 14, 16, 18, 21, 26, 32];
-        var data1 = gearcalc.buildData(f, r, '#1f77b4', 'scene1');
-
-//        sram eagle 1x11 system, 3 different front cog options
-        var f2 = [32];
-        var r2 = [10, 12, 14, 16, 18, 21, 24, 28, 32, 36, 42, 50];
-        var data2 = gearcalc.buildData(f2, r2, '#F71818', 'scene2');
-
-        var data = data1.concat(data2);
-        console.log(data);
-
-        var layout = {
+    var plot = {
+        layout: {
             scene1: {
                 domain: {
                     x: [0.0,  0.5],
-                    y: [0.5, 1.0]
+                    y: [0.0, 1.0]
                 }},
             scene2: {
                 domain: {
                     x: [0.5, 1],
-                    y: [0.5, 1.0]
+                    y: [0.0, 1.0]
                 }},
             height: 600,
             margin: {
@@ -254,8 +230,38 @@
                 pad: 20
             },
             showlegend: false
-        };
+        },
+        //my current 3x7 system
+        f1: [42, 32, 24],
+        r1: [12, 14, 16, 18, 21, 26, 32],
+        //sram eagle 1x11 system, 3 different front cog options
+        f2: [32],
+        r2: [10, 12, 14, 16, 18, 21, 24, 28, 32, 36, 42, 50],
+        init: function() {
+            $('#plotGenBtn').on('click', function(e) {
+                var currentFront = cogInput.getValues('currentFront');
+                var currentRear = cogInput.getValues('currentRear');
+                var consideringFront = cogInput.getValues('consideringFront');
+                var consideringRear = cogInput.getValues('consideringRear');
 
-        Plotly.newPlot('myDiv', data, layout);
+                var currentData = gearcalc.buildData(currentFront, currentRear, '#1f77b4', 'scene1');
+                var consideringData = gearcalc.buildData(consideringFront, consideringRear, '#1f77b4', 'scene2');
+
+                var data = currentData.concat(consideringData);
+                Plotly.newPlot('myDiv', data, plot.layout);
+            });
+        },
+        demo: function() {
+            var d1 = gearcalc.buildData(plot.f1, plot.r1, '#1f77b4', 'scene1');
+            var d2 = gearcalc.buildData(plot.f2, plot.r2, '#1f77b4', 'scene2');
+            var d = d1.concat(d2);
+            Plotly.newPlot('myDiv', d, plot.layout);
+        }
+    };
+
+    $(function() {
+        cogInput.init();
+        plot.init();
+        plot.demo();
     });
 </script>
