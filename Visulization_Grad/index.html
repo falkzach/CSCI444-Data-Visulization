@@ -3,20 +3,71 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js" integrity="sha384-THPy051/pYDQGanwU6poAc/hOdQxjnOEXzbT+OuUAFqNqFjL+4IGLBgCJC3ZOShY" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js" integrity="sha384-Plbmg8JY28KFelvJVai01l8WyZzrYWG825m+cZ0eDDS1f7d/js6ikvy1+X+guPIB" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.3/js/bootstrap.min.js" integrity="sha384-ux8v3A6CPtOTqOzMKiuo3d/DomGaaClxFYdCu2HPMBEkf6x2xiDyJ7gkXU0MWwaD" crossorigin="anonymous"></script>
-    
     <!-- Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container-fluid">
+<div class="container">
+    <h1>Bike Gearing</h1>
     <div class="row">
-        <h1>Bicycle Gearing</h1>
+        <div class="col-lg-6">
+            <h2>Current</h2>
+            <form>
+                <div class="form-group">
+                    <label for="currentFrontCount">Front Cog Count:</label>
+                    <input type="number" class="form-control" id="currentFrontCount" min="1" max="3" step="1" value="1">
+                    <label for="currentRearCount">Rear Cog Count:</label>
+                    <input type="number" class="form-control" id="currentRearCount" min="1" max="12" step="1" value="1">
+                </div>
+                <label for="currentFrontCogs">Front Tooth Counts:</label>
+                <div class="form-group" id="currentFrontCogs">
+
+                </div>
+                <label for="currentRearCogs">Front Tooth Counts:</label>
+                <div class="form-group" id="currentRearCogs">
+
+                </div>
+            </form>
+
+        </div>
+        <div class="col-lg-6">
+            <h2>Considering</h2>
+            <div class="form-group">
+                <label for="consideringFrontCount">Front Cog Count:</label>
+                <input type="number" class="form-control" id="consideringFrontCount" min="1" max="3" step="1" value="1">
+                <label for="consideringRearCount">Rear Cog Count:</label>
+                <input type="number" class="form-control" id="consideringRearCount" min="1" max="12" step="1" value="1">
+            </div>
+            <label for="consideringFrontCogs">Front Tooth Counts:</label>
+            <div class="form-group" id="consideringFrontCogs">
+
+            </div>
+            <label for="consideringRearCogs">Rear Tooth Counts:</label>
+            <div class="form-group" id="consideringRearCogs">
+
+            </div>
+        </div>
+    </div>
+    <button id="plotGenBtn">Generate Plots</button>
+    <div class="row">
         <!-- Plotly chart will be drawn inside this DIV -->
-        <div class="m-t-1 col-lg-4">
+        <div class="m-t-1 col-lg-12">
             <div id="myDiv" style="width:100%;height:100%"></div>
         </div>
     </div>
+
 </div>
+
+
+
+
+
+<div id="container">
+
+</div>
+</body>
+
 <script>
     var gearcalc = {
         buildLine: function(x, y, z, color, scene) {
@@ -90,8 +141,87 @@
         }
     };
 
-    $(function(){
-//        my current 3x7 system
+    var cogInput = {
+        currentFrontCount: 1,
+        currentRearCount: 1,
+        consideringFrontCount: 1,
+        consideringRearCount: 1,
+        init: function() {
+            $('#currentFrontCount').on('change', function(e) {
+                var newVal = parseInt(e.target.value);
+                cogInput.alterCogs(cogInput.currentFrontCount, newVal, 'currentFront');
+                cogInput.currentFrontCount = newVal;
+            });
+
+            $('#currentRearCount').on('change', function(e) {
+                var newVal = parseInt(e.target.value);
+                cogInput.alterCogs(cogInput.currentRearCount, newVal, 'currentRear');
+                cogInput.currentRearCount = newVal;
+            });
+
+            $('#consideringFrontCount').on('change', function(e) {
+                var newVal = parseInt(e.target.value);
+                cogInput.alterCogs(cogInput.consideringFrontCount, newVal, 'consideringFront');
+                cogInput.consideringFrontCount = newVal;
+            });
+
+            $('#consideringRearCount').on('change', function(e) {
+                var newVal = parseInt(e.target.value);
+                cogInput.alterCogs(cogInput.consideringRearCount, newVal, 'consideringRear');
+                cogInput.consideringRearCount = newVal;
+            });
+            cogInput.addCogs(1, 'currentFront');
+            cogInput.addCogs(1, 'currentRear');
+            cogInput.addCogs(1, 'consideringFront');
+            cogInput.addCogs(1, 'consideringRear');
+
+            $('#plotGenBtn').on('click', function(e) {
+                cogInput.getValues('currentFront');
+                cogInput.getValues('currentRear');
+                cogInput.getValues('consideringFront');
+                cogInput.getValues('consideringRear');
+            });
+        },
+        alterCogs: function(oldCount, newCount, cogSet) {
+            if(oldCount < newCount) {
+                cogInput.addCogs((newCount - oldCount), cogSet);
+            } else if (oldCount > newCount) {
+                cogInput.removeCogs((oldCount - newCount), cogSet)
+            }
+        },
+        addCogs: function(count, cogSet) {
+            for(var i = 0; i < count; i++) {
+                var input = $('<input>').attr({
+                    type: 'number',
+                    min: 1,
+                    max: 60,
+                    name: cogSet+'[]',
+                    "class": 'form-form-control cog',
+                    id: cogSet+i
+                });
+                var parent = $('#'+cogSet+'Cogs');
+                parent.append(input);
+            }
+        },
+        removeCogs: function(count, cogSet) {
+            for(var i = 0; i < count; i++) {
+                var element = $('#' + cogSet + 'Cogs input:last-child');
+                element.remove();
+            }
+        },
+        getValues: function(cogSet) {
+            var values = $("input[name='" + cogSet + "[]']").map(function(){
+                return parseInt($(this).val());
+            }).get();
+            console.log(values);
+            return values;
+        }
+    };
+
+    $(function() {
+        cogInput.init();
+
+        //        my current 3x7 system
         var f = [42, 32, 24];
         var r = [12, 14, 16, 18, 21, 26, 32];
         var data1 = gearcalc.buildData(f, r, '#1f77b4', 'scene1');
@@ -100,7 +230,6 @@
         var f2 = [32];
         var r2 = [10, 12, 14, 16, 18, 21, 24, 28, 32, 36, 42, 50];
         var data2 = gearcalc.buildData(f2, r2, '#F71818', 'scene2');
-
 
         var data = data1.concat(data2);
         console.log(data);
@@ -127,20 +256,6 @@
             showlegend: false
         };
 
-
-        /**  DERP! **/
-        function getrandom(num , mul){
-            var value = [ ];
-            for(i=0;i<=num;i++)
-            {
-                rand = Math.random() * mul;
-                value.push(rand);
-            }
-            return value;}
-
-
         Plotly.newPlot('myDiv', data, layout);
     });
 </script>
-</body>
-
