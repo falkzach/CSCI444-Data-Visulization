@@ -13,24 +13,13 @@
         <h1>Bicycle Gearing</h1>
         <!-- Plotly chart will be drawn inside this DIV -->
         <div class="m-t-1 col-lg-4">
-            <h2>Current</h2>
-            <div id="current" style="width:100%;height:100%"></div>
-            <div>
-                <form>
-
-                </form>
-            </div>
-        </div>
-        <!--need to figure out subplots,having multiple divs doesnt really work-->
-        <div class="m-t-1 col-lg-4">
-            <h2>Potential</h2>
-            <div id="considering" style="width:100%;height:100%"></div>
+            <div id="myDiv" style="width:100%;height:100%"></div>
         </div>
     </div>
 </div>
 <script>
     var gearcalc = {
-        buildLine: function(x, y, z, color) {
+        buildLine: function(x, y, z, color, scene) {
             return {
                 x: x,
                 y: y,
@@ -49,10 +38,11 @@
                     color: color,
                     width: 2.5
                 },
-                type: 'scatter3d'
+                type: 'scatter3d',
+                scene: scene
             }
         },
-        buildData: function(front, rear, color) {
+        buildData: function(front, rear, color, scene) {
             var data = [];
             for(var i = 0; i < front.length; i++) {
                 var x = [];
@@ -63,7 +53,7 @@
                     y.push(front[i]);
                     z.push(front[i] / rear[j]);
                 }
-                data.push(gearcalc.buildLine(x,y,z,color));
+                data.push(gearcalc.buildLine(x,y,z,color, scene));
             }
             var shifts = gearcalc.buildShifts(front, rear, color);
             return data.concat(shifts);
@@ -104,46 +94,52 @@
 //        my current 3x7 system
         var f = [42, 32, 24];
         var r = [12, 14, 16, 18, 21, 26, 32];
-        var data = gearcalc.buildData(f, r, '#1f77b4');
+        var data1 = gearcalc.buildData(f, r, '#1f77b4', 'scene1');
 
 //        sram eagle 1x11 system, 3 different front cog options
         var f2 = [32];
         var r2 = [10, 12, 14, 16, 18, 21, 24, 28, 32, 36, 42, 50];
-        var data2 = gearcalc.buildData(f2, r2, '#F71818');
+        var data2 = gearcalc.buildData(f2, r2, '#F71818', 'scene2');
 
-        var size = 550;
-        var margin = 40;
 
-        var current_layout = {
-//            title: 'Current Bicycle Gearing',
-            showlegend: false,
-            autosize: true,
-            width: size,
-            height: size,
+        var data = data1.concat(data2);
+        console.log(data);
+
+        var layout = {
+            scene1: {
+                domain: {
+                    x: [0.0,  0.5],
+                    y: [0.5, 1.0]
+                }},
+            scene2: {
+                domain: {
+                    x: [0.5, 1],
+                    y: [0.5, 1.0]
+                }},
+            height: 600,
             margin: {
-                l: margin,
-                r: margin,
-                b: margin,
-                t: margin
-            }
+                l: 0,
+                r: 0,
+                b: 0,
+                t: 0,
+                pad: 20
+            },
+            showlegend: false
         };
 
-        var considering_layout = {
-//            title: 'Considering Bicycle Gearing',
-            showlegend: false,
-            autosize: true,
-            width: size,
-            height: size,
-            margin: {
-                l: margin,
-                r: margin,
-                b: margin,
-                t: margin
-            }
-        };
 
-        Plotly.newPlot('current', data, current_layout);
-        Plotly.newPlot('considering', data2, considering_layout);
+        /**  DERP! **/
+        function getrandom(num , mul){
+            var value = [ ];
+            for(i=0;i<=num;i++)
+            {
+                rand = Math.random() * mul;
+                value.push(rand);
+            }
+            return value;}
+
+
+        Plotly.newPlot('myDiv', data, layout);
     });
 </script>
 </body>
