@@ -80,6 +80,9 @@
                 x: x,
                 y: y,
                 z: z,
+                xaxis: 'front tooth count',
+                yaxis: 'rear tooth count',
+                zaxis: 'ratio',
                 mode: mode,
                 marker: {
                     color: color,
@@ -220,12 +223,62 @@
                 domain: {
                     x: [0.0,  0.5],
                     y: [0.0, 1.0]
-                }},
+                },
+                xaxis: {
+                    title: 'Rear cog size',
+                    titlefont: {
+                        family: 'Arial, sans-serif',
+                        size: 18,
+                        color: 'lightgrey'
+                    }
+                },
+                yaxis: {
+                    title: 'Front cog size',
+                    titlefont: {
+                        family: 'Arial, sans-serif',
+                        size: 18,
+                        color: 'lightgrey'
+                    }
+                },
+                zaxis: {
+                    title: 'Gear Ratio',
+                    titlefont: {
+                        family: 'Arial, sans-serif',
+                        size: 18,
+                        color: 'lightgrey'
+                    }
+                }
+            },
             scene2: {
                 domain: {
                     x: [0.5, 1],
                     y: [0.0, 1.0]
-                }},
+                },
+                xaxis: {
+                    title: 'Rear cog size',
+                    titlefont: {
+                        family: 'Arial, sans-serif',
+                        size: 18,
+                        color: 'lightgrey'
+                    }
+                },
+                yaxis: {
+                    title: 'Front cog size',
+                    titlefont: {
+                        family: 'Arial, sans-serif',
+                        size: 18,
+                        color: 'lightgrey'
+                    }
+                },
+                zaxis: {
+                    title: 'Gear Ratio',
+                    titlefont: {
+                        family: 'Arial, sans-serif',
+                        size: 18,
+                        color: 'lightgrey'
+                    }
+                }
+            },
             height: 600,
             margin: {
                 l: 0,
